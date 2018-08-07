@@ -75,30 +75,8 @@ function init () {
 //new turn, in short
 function updateAll () {
 	mapSystem.updateEntitiesPosition();
-	displaySystem.updateBuffer();
 	displaySystem.update();
-	logger.showMessages();
 }
-
-const biomes = new Map();
-class Biome {
-	constructor (name, minTemp, maxTemp) {
-		this.name = name;
-		this.minTemp = minTemp;
-		this.maxTemp = maxTemp;
-		this.compatibleTileTypes = [];
-		biomes.set(this.name, this);
-	}
-	addTile (tileType) {
-		if (!this.compatibleTileTypes[tileType.id]) {this.compatibleTileTypes[tileType.id] = tileType};
-	}
-}
-new Biome("glacier", 0, zeroTemperature - 20);
-new Biome("tundra", zeroTemperature - 19, zeroTemperature);
-new Biome("temperate", zeroTemperature + 1, zeroTemperature + 20);
-new Biome("tropical", zeroTemperature + 21, zeroTemperature + 35);
-new Biome("desert", zeroTemperature + 36, maxTemperature);
-const biomeLookup = [];
 
 class MapSystem {
 	constructor () {
@@ -124,8 +102,6 @@ class MapSystem {
 		this.map = map;
 		this.rooms = generator.getRooms();
 		const randomCenter = this.rooms.random().getCenter();
-		console.log(randomCenter);
-		console.log(randomCenter[0]-12);
 		player = playerFactory.setX(randomCenter[0]).setY(randomCenter[1]).make();
 		displaySystem.bufferEntity.mover.moveTo(randomCenter[0]-12, randomCenter[1]-12);
 	}
@@ -193,8 +169,19 @@ class DisplaySystem {
 	constructor () {
 		this.buffer = new Array(displayOptions.width * displayOptions.height);
 		this.bufferEntity = new BufferEntity("buffer", 12, 12, "X", "#FF0000", true);
+		this.drawer; // Function that shows the screen.
+		this.showInventory = false; 
 		this.bx = 0; //buffer position x
 		this.by = 0; // buffer position y
+	}
+	update () {
+		if (this.showInventory) {
+			this.drawer = this.drawTheInventory;
+		}
+		else {
+			this.drawer = this.drawFromBuffer;
+		}
+		this.drawer();
 	}
 	/**
 	 * Draws from buffer to the canvas.
@@ -202,8 +189,10 @@ class DisplaySystem {
 	 * @see DisplaySystem.updateBuffer
 	 * @method
 	 */
-	update () {
+	drawFromBuffer () {
+		displaySystem.updateBuffer();
 		display.clear();
+		logger.showMessages();
 		for (let i = 0; i < bufferOptions.width; i++) {
 			for (let j = 0; j < bufferOptions.height; j++) {
 				let pos = i + (j * bufferOptions.width);
@@ -219,6 +208,10 @@ class DisplaySystem {
 
 			}
 		}
+	}
+	drawTheInventory () {
+		display.clear();
+		display.drawText(1, 1, "Inventory");
 	}
 	/**
 	 * Updates the buffer. Update() should be called afterwards
@@ -274,13 +267,9 @@ class DisplaySystem {
 	 * @param {string} color
 	 * @method
 	*/
-	drawBuffer (x, y, character, color) {
+	drawOnBuffer (x, y, character, color) {
 		let pos = x + displayOptions.width * y;
 		this.buffer[pos] = [character, color];
-	}
-	//Shows inventory instead of the map
-	updateShowInventory () {
-
 	}
 	/*_makeBox (text) {
 		for (let i = 0; i > text.length; i++) {
@@ -292,18 +281,21 @@ class DisplaySystem {
 			drawBuffer(bufferOptions.width/2-text.length,(bufferOptions.height/2)+1);
 		}
 	}*/
+	toggleShowInventory () {
+		this.showInventory = !this.showInventory;
+	}
 }	
 
 class InputSystem {
 	constructor () {
 		const parthis = this; //lazy solution since addeventlistener kills this
 		window.addEventListener("keydown", function (e) {
-			let code = e.keyCode;
-			parthis.iterate(code);
+			let key = e.key;
+			parthis.iterate(key);
 		});
 		window.addEventListener("mousedown", function (e) {
 			const pos = display.eventToPosition(e);
-			console.log(pos[0] + "," + pos[1]);
+			logger.logShow("That is "+pos[0] + "," + pos[1]);
 			//This will display the problem tiles outside the map. Probably a consequence of mathematics
 			console.log(mapSystem.getTile(pos[0] + displaySystem.bx , pos[1] + displaySystem.by));
 		})
@@ -311,13 +303,13 @@ class InputSystem {
 	}
 	/**
 	 * Sends keycode to every entity that cares ("has an AI")
-	 * @param {number} code 
+	 * @param {number} key
 	 */
-	iterate (code) {
+	iterate (key) {
 		for (let i = 0; i < entities.length; i++) {
 			if (entities[i].Ai) {
 				//Hi, Ai, call this
-				entities[i].Ai.handleInput(code);
+				entities[i].Ai.handleInput(key);
 			}
 		}
 	}
@@ -378,6 +370,10 @@ class Logger {
 
 		this.logs.push(...messagePieces);
 		this.numLogs+=messagePieces.length;
+	}
+	logShow (message) {
+		this.log(message);
+		this.showMessages();
 	}
 }
 

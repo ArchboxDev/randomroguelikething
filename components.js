@@ -188,28 +188,28 @@ class Ai extends Component {
 		return false;
 	}
 }
-//because dont repeat yourself
-function playerMoveFunction (direction, plusX, plusY) {
-	if (this.doNotOutOfBoundsCheck(this.positionComponent.x, this.positionComponent.y, direction)) return;
-	this.mover.move(plusX, plusY);
-}
 
 class PlayerAi extends Ai {
 	constructor (parent, positionComponent, mover) {
 		super(parent, positionComponent, mover);
 	}
+	playerMoveFunction (direction, plusX, plusY) {
+		if (this.doNotOutOfBoundsCheck(this.positionComponent.x, this.positionComponent.y, direction)) return;
+		this.mover.move(plusX, plusY);
+	}
 	handleInput (input) {
 		switch (input) { 
-			case 87: playerMoveFunction.call(this, "up"   , 0,  -1); break;
-			case 83: playerMoveFunction.call(this, "down" , 0,  +1); break;
-			case 65: playerMoveFunction.call(this, "left" , -1,  0); break;
-			case 68: playerMoveFunction.call(this, "right", +1,  0); break;
-			case 76: this.look(); break;
+			case 'w': this.playerMoveFunction("up"   , 0,  -1); break;
+			case 's': this.playerMoveFunction("down" , 0,  +1); break;
+			case 'a': this.playerMoveFunction("left" , -1,  0); break;
+			case 'd': this.playerMoveFunction("right", +1,  0); break;
+			case 'e': this.showInventory(); break;
 			default: break;
 		}
 	}
-	look () {
-
+	showInventory () {
+		displaySystem.toggleShowInventory();
+		displaySystem.update();
 	}
 }
 class BufferAi extends Ai {

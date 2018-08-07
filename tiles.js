@@ -1,20 +1,3 @@
-const maxTemperature = 100;
-const zeroTemperature = 50;
-
-class RequiredTemperature {
-	/**
-	 * The required temperature for this tile.
-	 * 
-	 * @class
-	 * @param {number} min The minimum temperature
-	 * @param {number} max The maximum temperature
-	 */
-    constructor (min, max) {
-        this.min = zeroTemperature + min;
-		this.max = zeroTemperature + max;
-	}
-}
-
 const tileTypes = [];
 class TileType {
 	/**

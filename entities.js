@@ -274,6 +274,7 @@ class Furniture extends Decoration {
 	 * @param {function} callback callback to call when player interacts with this item
 	 */
 	constructor (x, y, character, color, callback) {
+		super(x, y, character, color);
 		
 	}
 }
@@ -294,6 +295,7 @@ const playerFactory = new EntityFactory()
 .setHp(10)
 .setIsPlayer(true);
 
+//forward declarations in javascript what a woozy
 let player;
 
 const npc = new EntityFactory()

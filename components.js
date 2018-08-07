@@ -84,6 +84,9 @@ class HasInventory extends Component {
 		this.inventory.splice(pos);
 		this.items--;
 	}
+	list () {
+		
+	}
 }
 class WalkIntoAction extends Component {
 	constructor (parent, callback) {

@@ -42,7 +42,7 @@ const healthOptions = {
 display.setOptions(displayOptions);
 //const logDisplayOptions = {height: 25, width: 25, fontSize: 25, bg: "#000000"/* spacing: 0.75 */};
 const mapOptions = {
-	height: 50, width: 75
+	height: 75, width: 75
 };
 const diggerOptions = {
 	roomWidth: [5, 10],
@@ -124,6 +124,8 @@ class MapSystem {
 		this.map = map;
 		this.rooms = generator.getRooms();
 		const randomCenter = this.rooms.random().getCenter();
+		console.log(randomCenter);
+		console.log(randomCenter[0]-12);
 		player = playerFactory.setX(randomCenter[0]).setY(randomCenter[1]).make();
 		displaySystem.bufferEntity.mover.moveTo(randomCenter[0]-12, randomCenter[1]-12);
 	}

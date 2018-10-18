@@ -106,6 +106,7 @@ class MapSystem {
 		displaySystem.bufferEntity.mover.moveTo(randomCenter[0]-12, randomCenter[1]-12);
 	}
 	putOnMap (x, y, entity) {
+		
 		this.map[x + y * mapOptions.width].entityHere = entity;
 		this.entitiesOnMap[entity.id] = {x: entity.position.x, y: entity.position.y};
 	}
@@ -120,7 +121,6 @@ class MapSystem {
 	 * @returns {Boolean} should something continue moving
 	 */
 	checkMove (something, differenceFromPosition) {
-
 		const newPlace = this.map[(something.position.x + differenceFromPosition[0]) + ((something.position.y + differenceFromPosition[1]) * mapOptions.width)];
 		if (newPlace.entityHere && newPlace.entityHere.collide) {
 			if (newPlace.entityHere.collide.call()) {
@@ -220,7 +220,7 @@ class DisplaySystem {
 	 * @method
 	 */
 	updateBuffer () {
-		//this.buffer = new Array(displayOptions.width * displayOptions.height);
+		this.buffer = new Array(displayOptions.width * displayOptions.height);
 
 		//console.log(this.bx + ","+ this.by);
 		this.bx = this.bufferEntity.position.x;
@@ -318,9 +318,7 @@ class InputSystem {
 //oh yea do this sometime
 class DamageSystem {
 	constructor () {
-		if (!player.health) {
-			throw new Error("Player doesn't have HP - this is required!");
-		}
+		
 	}
 
 	updatePlayersHealth () {

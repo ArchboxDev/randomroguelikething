@@ -113,7 +113,7 @@ class LivingEntity extends Entity {
 			this.collide = this.destructible;
 		}
 		if (isPlayer) {
-			this.Ai = new PlayerAi(this, this.position, this.mover)
+			this.Ai = new PlayerAi(this, this.position, this.mover);
 		};
 	}
 	blocker () {

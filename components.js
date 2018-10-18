@@ -217,43 +217,42 @@ class BufferAi extends Ai {
 		super(parent, positionComponent, mover);
 	}
 	handleInput (input) {
-	//	console.log(this.positionComponent.x + "," + this.positionComponent.y);
+		//console.log(this.positionComponent.x + "," + this.positionComponent.y);
 		switch (input) { 
-			case 87: this.up(); break;
-			case 65: this.left(); break;
-			case 83: this.down(); break;
-			case 68: this.right(); break;
+			case 'w': this.up(); break;
+			case 'a': this.left(); break;
+			case 's': this.down(); break;
+			case 'd': this.right(); break;
 
 			default: break;
 		}
 	}
 	up () {
-		if (!player.mover.hasLastMoved) {updateAll(); return;}
+		if (!mapSystem.checkMove(player, [0, -1])) {return;}
 		//Not sure if right/best solution. Keeps camera from "running away" at the edge
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'up')) return;
 		updateAll();
 		this.mover.move(0, -1);
-		
 	}
 	down () {
-		if (!player.mover.hasLastMoved) {updateAll(); return;}
+		if (!mapSystem.checkMove(player, [0, 1])) { return;}
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'down')) return;
 		updateAll();
 		this.mover.move(0, 1);
 		
 	}
 	left () {
-		if (!player.mover.hasLastMoved) {updateAll(); return;}
+		if (!mapSystem.checkMove(player, [-1, 0])) {return;}
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'left')) return;
 		updateAll();
-		this.mover.move(-1, 0)
+		this.mover.move(-1, 0);
 	
 	}
 	right () {
-		if (!player.mover.hasLastMoved) {updateAll(); return;}
+		if (!mapSystem.checkMove(player, [1, 0])) {return;}
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'right')) return;
 		updateAll();
-		this.mover.move(1, 0)
+		this.mover.move(1, 0);
 		
 	}
 }

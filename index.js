@@ -97,6 +97,7 @@ class MapPopulator {
 		generator.create(generatorCallback);
 		this.map = map;
 		this.rooms = generator.getRooms();
+
 		const randomCenter = this.rooms.random().getCenter();
 		player = playerFactory.setX(randomCenter[0]).setY(randomCenter[1]).make();
 		displaySystem.bufferEntity.mover.moveTo(randomCenter[0]-12, randomCenter[1]-12);
@@ -287,7 +288,6 @@ class DisplaySystem {
 						this.buffer[pos] = tile.tileType.tile.query();
 						if (tile.hasSeen && !tile.inSight) {
 							this.buffer[pos][1] = ROT.Color.toHex(ROT.Color.interpolate(ROT.Color.fromString(this.buffer[pos][1]), ROT.Color.fromString("#000000")), 0.3);
-							if (tile.tileType.name == "grass") console.log(this.buffer[pos][1]);
 						}
 					}
 				}

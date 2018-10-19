@@ -116,13 +116,13 @@ class CanDie extends Component {
 		this.dead = true;
 		this.display.tile.bg = "#ff0000";
 		if (this.parent.blocks) this.parent.blocks = false;
-		logger.log(`${this.parent.name} has died!`);
+		logger.logShow(`${this.parent.name} has died!`);
 	}
 	respawn () {
 		this.dead = false;
 		this.display.tile.bg = "";
 		this.parent.blocks = true;
-		logger.log(`${this.parent.name} has risen from the dead!`);
+		logger.logShow(`${this.parent.name} has risen from the dead!`);
 	}
 }
 class CanBreak extends CanDie {
@@ -134,7 +134,7 @@ class CanBreak extends CanDie {
 	die () {
 		this.broken = true;
 		if (this.parent.blocks) this.parent.blocks = false;
-		logger.log(`${this.parent.name} breaks.`);
+		logger.logShow(`${this.parent.name} breaks.`);
 	}
 }
 class IsDestructible extends WalkIntoAction {
@@ -147,13 +147,13 @@ class IsDestructible extends WalkIntoAction {
 	}
 	attack (damage) {
 		if (this.canDie.dead) {
-			logger.log(`${this.parent.name} is already dead!`);
+			logger.logShow(`${this.parent.name} is already dead!`);
 			return;
 		}
 		const actualDamage = damage - this.defence;
 		this.hp = this.hp - actualDamage;
 
-		logger.log(`${this.parent.name} was hit for ${actualDamage}!`);
+		logger.logShow(`${this.parent.name} was hit for ${actualDamage}!`);
 
 		if (this.hp <= 0) {
 			this.canDie.die();

@@ -29,11 +29,15 @@ class DisplayTile {
 	 * @param {string} character Character of the tile
 	 * @param {string} color Color of the character
 	 * @param {string} bg Background color of the character
+	 * @property {boolean} hasSeen Whether this tile has been in the FOV of the player
+	 * @property {boolean} inSight Whether this tile is in the FOV of the player
 	 */
 	constructor (character, color, bg) {
 		this.character = character || '';
 		this.color = color || '';
 		this.bg = bg || '';
+		this.hasSeen = false;
+		this.inSight = false;
 	}
 	/**
 	 * Return buffer-friendly tile

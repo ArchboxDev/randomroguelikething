@@ -49,6 +49,8 @@ const diggerOptions = {
 	roomHeight: [5, 20],
 	dugPercentage: 0.2
 }
+//how far the player can see starting from the player
+const playerLightRadius = 5;
 
 
 const displayContainer = display.getContainer();
@@ -78,16 +80,10 @@ function updateAll () {
 	displaySystem.update();
 }
 
-class MapSystem {
+class MapPopulator {
 	constructor () {
-		this.map = new Array(mapOptions.height * mapOptions.width);
-		this.rooms = [];
-
-		//this has to look up the entities' current position on the map which is annoying. so i save it here
-		this.entitiesOnMap = {};
-	}
-	generateNoise () {
-
+		this.map;
+		this.rooms;
 	}
 	populateMap () {
 		const map = new Array(mapOptions.height * mapOptions.width);
@@ -104,6 +100,23 @@ class MapSystem {
 		const randomCenter = this.rooms.random().getCenter();
 		player = playerFactory.setX(randomCenter[0]).setY(randomCenter[1]).make();
 		displaySystem.bufferEntity.mover.moveTo(randomCenter[0]-12, randomCenter[1]-12);
+
+		return [this.map, this.rooms];
+	}
+}
+
+class MapSystem {
+	constructor () {
+		this.map = [];
+		this.rooms = [];
+
+		//this has to look up the entities' current position on the map which is annoying. so i save it here
+		this.entitiesOnMap = {};
+		this.queryLightPassablity = this.queryLightPassablity.bind(this);
+	}
+	populateMap () {
+		
+		[this.map, this.rooms] = new MapPopulator().populateMap();
 	}
 	putOnMap (x, y, entity) {
 		
@@ -112,6 +125,18 @@ class MapSystem {
 	}
 	getTile (x, y) {
 		return this.map[x + y * mapOptions.width];
+	}
+	queryLightPassablity (x, y) {
+		if (this.map[x + y * mapOptions.width] && this.map[x + y * mapOptions.width].tileType) {return !this.map[x + y * mapOptions.width].tileType.blocks;}
+		else {return false;}
+	}
+	queryTileName (x, y) {
+		if (this.map[x + y * mapOptions.width].entityHere && this.map[x + y * mapOptions.width].entityHere.display) {
+			return this.map[x + y * mapOptions.width].entityHere.name;
+		} 
+		else {
+			return this.map[x + y * mapOptions.width].tileType.name;
+		}
 	}
 	/**
 	 * Call before something moves
@@ -165,6 +190,15 @@ class MapSystem {
 	}
 }
 
+class FOV { 
+	constructor () {
+		this.fov = new ROT.FOV.PreciseShadowcasting(mapSystem.queryLightPassablity);
+	}
+	calculateFOV (x, y, callback) {
+		this.fov.compute(x, y, playerLightRadius, callback);
+	}
+}
+
 class DisplaySystem {
 	constructor () {
 		this.buffer = new Array(displayOptions.width * displayOptions.height);
@@ -173,6 +207,7 @@ class DisplaySystem {
 		this.showInventory = false; 
 		this.bx = 0; //buffer position x
 		this.by = 0; // buffer position y
+		this.fov = new FOV();
 	}
 	update () {
 		if (this.showInventory) {
@@ -190,7 +225,9 @@ class DisplaySystem {
 	 * @method
 	 */
 	drawFromBuffer () {
+		displaySystem.updateBufferFOV();
 		displaySystem.updateBuffer();
+
 		display.clear();
 		logger.showMessages();
 		for (let i = 0; i < bufferOptions.width; i++) {
@@ -237,24 +274,34 @@ class DisplaySystem {
 				const isOutsideMap = bufferx < 0 || bufferx >= mapOptions.width || buffery < 0 || buffery >= mapOptions.height;
 				const pos = i + j * bufferOptions.width;
 
-				//FOV
-
-
 				//Bloody hack: If it's outside the map, then dont draw it
-				if (!tile || isOutsideMap) {this.buffer[pos] = new DisplayTile('', '', '#000000').query()}
-				else if (tile.entityHere && tile.entityHere.display) {
+				if (!tile || isOutsideMap) {this.buffer[pos] = new DisplayTile('', '', '#000000').query(); continue;}
+				else if (tile.entityHere && tile.entityHere.display && (tile.hasSeen || tile.inSight)) {
 					const entity = tile.entityHere;
 
 					this.buffer[pos] = entity.display.tile.query();
 				}
-				else {
-					if (tile.varietyColor) {this.buffer[i+j*bufferOptions.width]=[tile.tileType.tile.character, tile.varietyColor]}
-					else {this.buffer[pos] = tile.tileType.tile.query();}
+				else if (tile.hasSeen || tile.inSight) {
+					if (tile.varietyColor) {this.buffer[i+j*bufferOptions.width]=[tile.tileType.tile.character, tile.varietyColor];}
+					else {
+						this.buffer[pos] = tile.tileType.tile.query();
+						if (tile.hasSeen && !tile.inSight) {
+							this.buffer[pos][1] = ROT.Color.toHex(ROT.Color.interpolate(ROT.Color.fromString(this.buffer[pos][1]), ROT.Color.fromString("#000000")), 0.3);
+							if (tile.tileType.name == "grass") console.log(this.buffer[pos][1]);
+						}
+					}
 				}
-				
-
+				tile.inSight = false;
 			}
 		}
+	}
+	updateBufferFOV () {
+		this.fov.calculateFOV(player.position.x, player.position.y, (x, y, r, visibility)=>{
+			// maybe put the put into buffer code here
+			// maybe mark a "has seen" and "in sight" on the tile?
+			mapSystem.getTile(x, y).inSight = true;
+			mapSystem.getTile(x, y).hasSeen = true;
+		});
 	}
 	/**
 	 * Draws on the buffer. Should be used in between updateBuffer() and update(); Not used by entities anymore.
@@ -295,9 +342,8 @@ class InputSystem {
 		});
 		window.addEventListener("mousedown", function (e) {
 			const pos = display.eventToPosition(e);
-			logger.logShow("That is "+pos[0] + "," + pos[1]);
-			//This will display the problem tiles outside the map. Probably a consequence of mathematics
-			console.log(mapSystem.getTile(pos[0] + displaySystem.bx , pos[1] + displaySystem.by));
+			const name = mapSystem.queryTileName(pos[0] + displaySystem.bx , pos[1] + displaySystem.by);
+			logger.logShow("That is a " +name+".");
 		})
 
 	}

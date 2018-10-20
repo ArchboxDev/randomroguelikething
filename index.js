@@ -365,7 +365,10 @@ class InputSystem {
 		window.addEventListener("mousedown", function (e) {
 			const pos = display.eventToPosition(e);
 			const name = mapSystem.queryTileName(pos[0] + displaySystem.bx , pos[1] + displaySystem.by);
-			logger.logShow("That is a " +name+".");
+			const tile = mapSystem.getTile(pos[0]+displaySystem.bx, pos[1]+ displaySystem.by);
+
+			if (!tile.hasSeen) {logger.logShow("You haven't seen that!")}
+			else {logger.logShow("That is a " +name+".");}
 		})
 
 	}

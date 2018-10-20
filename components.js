@@ -102,7 +102,9 @@ class CanPickUp extends WalkIntoAction {
 		super(parent);
 	}
 	pickup () {
-		
+		player.inventory.add(this.parent);
+		mapSystem.clearEntity(this.parent.position.x, this.parent.position.y);
+		delete this.parent.position;
 	}
 }
 class CanDie extends Component {
@@ -171,6 +173,7 @@ class IsDestructible extends WalkIntoAction {
 class IsSign extends WalkIntoAction {
 	cosntructor () {}
 }
+// "ai" hahaha you can call anything an AI in this day and age
 class Ai extends Component {
 	constructor (parent, positionComponent, mover) {
 		super(parent, "ai");
@@ -192,18 +195,54 @@ class Ai extends Component {
 class PlayerAi extends Ai {
 	constructor (parent, positionComponent, mover) {
 		super(parent, positionComponent, mover);
+		this.pickingUp = false;
 	}
 	playerMoveFunction (direction, plusX, plusY) {
 		if (this.doNotOutOfBoundsCheck(this.positionComponent.x, this.positionComponent.y, direction)) return;
 		this.mover.move(plusX, plusY);
 	}
+	w () {
+		if (this.pickingUp) {
+			this.pickUp(0, -1);
+		}
+		else {this.playerMoveFunction("up", 0, -1)}
+	}
+	a () {
+		if (this.pickingUp) {
+			this.pickUp(-1, 0);
+		}
+		else {this.playerMoveFunction("left", -1, 0)}
+	}
+	s () {
+		if (this.pickingUp) {
+			this.pickUp(0, 1);
+		}
+		else {this.playerMoveFunction("down", 0, 1)}
+	}
+	d () {
+		if (this.pickingUp) {
+			this.pickUp(1, 0);
+		}
+		else {this.playerMoveFunction("right", 1, 0)}
+	}
+	pickUp (plusX, plusY) {
+		const here = mapSystem.getTile(this.positionComponent.x + plusX, this.positionComponent.y + plusY);
+		if (!here.entityHere || !here.entityHere instanceof Item) {logger.logShow("There's nothing to pick up there!")}
+		else {
+			logger.logShow(`You pick up a ${here.entityHere.itemInfo.name}.`);
+			here.entityHere.pickup.pickup(); 
+			updateAll();
+		}
+		this.pickingUp = false;
+	}
 	handleInput (input) {
 		switch (input) { 
-			case 'w': this.playerMoveFunction("up"   , 0,  -1); break;
-			case 's': this.playerMoveFunction("down" , 0,  +1); break;
-			case 'a': this.playerMoveFunction("left" , -1,  0); break;
-			case 'd': this.playerMoveFunction("right", +1,  0); break;
+			case 'w': this.w(); break;
+			case 's': this.s(); break;
+			case 'a': this.a(); break;
+			case 'd': this.d(); break;
 			case 'e': this.showInventory(); break;
+			case 'p': this.pickingUp = true; logger.logShow("Choose what to pick up..."); break;
 			default: break;
 		}
 	}
@@ -228,28 +267,28 @@ class BufferAi extends Ai {
 		}
 	}
 	up () {
-		if (!mapSystem.checkMove(player, [0, -1])) {return;}
+		if (!mapSystem.checkMove(player, [0, -1]) || player.Ai.pickingUp) {return;}
 		//Not sure if right/best solution. Keeps camera from "running away" at the edge
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'up')) return;
 		updateAll();
 		this.mover.move(0, -1);
 	}
 	down () {
-		if (!mapSystem.checkMove(player, [0, 1])) { return;}
+		if (!mapSystem.checkMove(player, [0, 1])|| player.Ai.pickingUp) { return;}
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'down')) return;
 		updateAll();
 		this.mover.move(0, 1);
 		
 	}
 	left () {
-		if (!mapSystem.checkMove(player, [-1, 0])) {return;}
+		if (!mapSystem.checkMove(player, [-1, 0])|| player.Ai.pickingUp) {return;}
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'left')) return;
 		updateAll();
 		this.mover.move(-1, 0);
 	
 	}
 	right () {
-		if (!mapSystem.checkMove(player, [1, 0])) {return;}
+		if (!mapSystem.checkMove(player, [1, 0])|| player.Ai.pickingUp) {return;}
 		if (this.doNotOutOfBoundsCheck(player.position.x, player.position.y, 'right')) return;
 		updateAll();
 		this.mover.move(1, 0);

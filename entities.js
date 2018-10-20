@@ -239,6 +239,7 @@ class Item extends Entity {
 		super();
 		this.position = new HasPosition(this, x, y);
 		this.itemInfo = itemInfo;
+		this.name = this.itemInfo.name;
 
 		this.display = new HasDisplay(this, this.position, itemInfo.character, itemInfo.color);
 		this.pickup = new CanPickUp(this);

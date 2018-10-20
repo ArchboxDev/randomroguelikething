@@ -102,6 +102,12 @@ class MapPopulator {
 		generator.create(generatorCallback);
 		this.map = map;
 		this.rooms = generator.getRooms();
+		
+		for (let i = 0; i < this.rooms.length; i++) {
+			const center = this.rooms[i].getCenter();
+			pie.make(center[0], center[1]);
+			lomb.setX(center[0]+1).setY(center[1]).make();
+		}
 
 		const randomCenter = this.rooms.random().getCenter();
 		player = playerFactory.setX(randomCenter[0]).setY(randomCenter[1]).make();
@@ -168,8 +174,12 @@ class MapSystem {
 		}
 		else return true;
 	}
+	clearEntity (x, y) {
+		this.map[x + y * mapOptions.width].entityHere = undefined;
+	}
 	updateEntitiesPosition () {
 		for (let i = 0; i < entities.length; i++) {
+
 			//this is only needed for those with a display (those without wouldn't need to be called by the display system)
 			if (entities[i].position && entities[i].display) {
 				//check out the previous position of entity
@@ -178,10 +188,10 @@ class MapSystem {
 				
 				if (!this.entitiesOnMap[id]) {mapSystem.putOnMap(entity.position.x, entity.position.y, entity);}
 				else {
-					let previousPosition= {x: this.entitiesOnMap[id].x, y: this.entitiesOnMap[id].y};
+					let previousPosition= {x: this.entitiesOnMap[id].x, y: this.entitiesOnMap[id].y}; 
 					let previousSlotEntity = this.getTile(previousPosition.x, previousPosition.y).entityHere;
 					//clear previous position on map
-					if (previousSlotEntity == entity) this.map[previousPosition.x+mapOptions.width*previousPosition.y].entityHere = undefined;
+					if (previousSlotEntity == entity) this.clearEntity(previousPosition.x, previousPosition.y);
 					
 					//logger.log(this.map[previousPosition.x+mapOptions.width*previousPosition.y].entityHere)
 				//	if (entity == player) logger.log(this.getTile(player.position.x, player.position.y).tileType.name);
@@ -200,6 +210,12 @@ class FOV {
 	}
 	calculateFOV (x, y, callback) {
 		this.fov.compute(x, y, playerLightRadius, callback);
+	}
+}
+
+class ConnectedTileSystem {
+	constructor () {
+
 	}
 }
 
@@ -253,6 +269,9 @@ class DisplaySystem {
 	drawTheInventory () {
 		display.clear();
 		display.drawText(1, 1, "Inventory");
+		for (let i = 0; i < player.inventory.inventory.length; i++) {
+			display.drawText(1, 2+i, `* A ${player.inventory.inventory[i].name}`);
+		}
 	}
 	/**
 	 * Updates the buffer. Update() should be called afterwards

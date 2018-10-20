@@ -1,11 +1,19 @@
-#container #game {
+#container {
     border: 3px solid white;
     display:flex;
     justify-content:center;
     align-items:center;
 }
 
+#game {
+    float: left;
+}
 body {
     background-color: #000000;
+    color: #ffffff;
     font-family: Helvetica, Verdana, sans-serif;
+}
+
+#instructions {
+    float: right;
 }

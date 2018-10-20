@@ -53,6 +53,23 @@ class Tile {
 	}
 }
 
+class ConnectedTile extends Tile {
+	constructor (x, y, tileType, varietyColor) {
+		super(x, y, tileType, varietyColor);
+		this.character = '';
+
+	}
+	/**
+	 * Calculate/ update the character of this connected tile
+	 * @param {boolean[]} nearby Similar tiles nearby 
+	 */
+	calculateTile (nearby) {
+		if (nearby.north || nearby.south) {this.character = "║"; return;}
+		else if (nearby.east || nearby.west) {this.character = "═"; return;}
+		else {this.character = "O"; return;}
+	}
+}
+
 class TileFactory {
 	constructor () {
 		this.name = "";
@@ -63,9 +80,7 @@ class TileFactory {
 	
 }
 
-//degrees c
-//#00ff00
-const grass = new TileType("grass", "#", "#119933", "");
+const grass = new TileType("grass", "#", "#33bb44", "");
 const sand = new TileType("sand", ".", "#d1d080", '' );
 const ice = new TileType("ice", "*", "#0022ff", '');
 const snow = new TileType("snow", "*", "#ffffff", '');

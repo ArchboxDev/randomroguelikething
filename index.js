@@ -5,16 +5,6 @@
  */
 const display = new ROT.Display();
 /**
- * Managed by DisplaySystem. Whole screen's options.
- * @see DisplaySystem.update
- * @constant
- */
-const displayOptions = {
-	height: 25, width: 50,
-	bg: '#000000', 
-	fontSize: 25
-};
-/**
  * Managed by DisplaySystem. Left side of screen.
  * @see DisplaySystem.updateBuffer
  * @constant
@@ -29,7 +19,18 @@ const bufferOptions = {
  */
 const logOptions = {
 	maxMessages: 20,
-	width: displayOptions.width - bufferOptions.width
+	width: 25
+};
+/**
+ * Managed by DisplaySystem. Whole screen's options.
+ * @see DisplaySystem.update
+ * @constant
+ */
+const displayOptions = {
+	// 2 is the seperator
+	height: 25, width: bufferOptions.width + logOptions.width + 2 ,
+	bg: '#000000', 
+	fontSize: 25
 };
 /**
  * Managed by DamageSystem. Bottom right of screen
@@ -74,7 +75,11 @@ function init () {
 	
 }
 
-//new turn, in short
+/**
+ * Run every turn to update the locations of entities and the screen
+ * 
+ * @function
+ */
 function updateAll () {
 	mapSystem.updateEntitiesPosition();
 	displaySystem.update();
@@ -116,11 +121,9 @@ class MapSystem {
 		this.queryLightPassablity = this.queryLightPassablity.bind(this);
 	}
 	populateMap () {
-		
 		[this.map, this.rooms] = new MapPopulator().populateMap();
 	}
 	putOnMap (x, y, entity) {
-		
 		this.map[x + y * mapOptions.width].entityHere = entity;
 		this.entitiesOnMap[entity.id] = {x: entity.position.x, y: entity.position.y};
 	}

@@ -412,7 +412,7 @@ class Logger {
 			this.logs.shift(); this.numLogs--; //pop them out boys
 		}
 		for (let i = 0; i < this.numLogs; i++) {
-			let message = this.logs[i];
+			let message = this.logs[i].value;
 			
 			let color;
 			if (i == this.numLogs-1) {color = "#fff"}
@@ -435,7 +435,7 @@ class Logger {
 	 */
 	log (message) {
 		let originalMessage = message;
-		let messagePieces = chunkString(originalMessage,logOptions.width);
+		let messagePieces = ROT.Text.tokenize(message, logOptions.width);
 
 		this.logs.push(...messagePieces);
 		this.numLogs+=messagePieces.length;

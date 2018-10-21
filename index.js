@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Extensive documentation never hurts, I guess? 
  * 
@@ -55,6 +56,7 @@ const playerLightRadius = 5;
 
 
 const displayContainer = display.getContainer();
+displayContainer.setAttribute("tabindex", 1)
 // displayContainer.className = "container";
 document.getElementById("game").appendChild(displayContainer);
 //const log = new ROT.Display(logDisplayOptions);
@@ -127,7 +129,8 @@ class MapSystem {
 		this.queryLightPassablity = this.queryLightPassablity.bind(this);
 	}
 	populateMap () {
-		[this.map, this.rooms] = new MapPopulator().populateMap();
+		const populateMapOutput = new MapPopulator().populateMap();
+		this.map = populateMapOutput[0]; this.rooms = populateMapOutput[1];
 	}
 	putOnMap (x, y, entity) {
 		this.map[x + y * mapOptions.width].entityHere = entity;

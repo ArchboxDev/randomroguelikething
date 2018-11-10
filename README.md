@@ -1,3 +1,5 @@
-# random roguelike thing i made overnight
+# Rewrite
 
-this is not a high standard of programming
+This is STILL not a high standard of programming.
+
+It's closer, through.

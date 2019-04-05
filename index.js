@@ -373,7 +373,11 @@ class InputSystem {
 			if (!tile.hasSeen) {logger.logShow("You haven't seen that!")}
 			else {logger.logShow("That is a " +name+".");}
 		})
-
+        document.getElementById("mobileInput").addEventListener("keydown", function (e) {
+            let key = e.key;
+            e.preventDefault();
+            parthis.iterate(key);
+        });
 	}
 	/**
 	 * Sends keycode to every entity that cares ("has an AI")
